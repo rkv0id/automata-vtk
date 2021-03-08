@@ -7,7 +7,7 @@ def update(grida, gridb, i, j):
     elif grida[i,j] == 0 and grida[i-1:i+2, j-1:j+2].sum() == 3:
         gridb[i+1,j+1] = 1
 
-def main(nx, ny, iters, outfolder):
+def simulate(nx, ny, iters, outfolder):
     grid0 = np.random.randint(2, size=(nx,ny))
     grid1 = np.zeros((nx+2,ny+2))
     grid1[1:nx+1,1:ny+1] = grid0.copy()
@@ -26,4 +26,4 @@ if __name__ == "__main__":
     nx, ny = 512, 512
     iters = 200
     outfolder = "out"
-    main(nx, ny, iters, outfolder)
+    simulate(nx, ny, iters, outfolder)
