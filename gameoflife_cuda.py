@@ -1,10 +1,11 @@
 import numpy as np
 from numba import cuda
 from matplotlib.pyplot import imsave
+from array2gif import write_gif
+from time import time as timer
 
 # globals
-nx, ny = 256, 512
-iters = 500
+nx, ny = 512, 256
 outfolder = "out_gpu"
 
 # CUDA setup
@@ -39,16 +40,42 @@ def update(grida, gridb):
         elif grida[x,y] == 0 and neighbors == 3:
             gridb[x+1,y+1] = 1
 
-def simulate():
+def simulate(iterations=250):
     """CA simulation steps generation
     """
+    frames = []
+    print("Starting simulation...")
+    start = timer()
     grid0 = cuda.to_device(np.random.randint(2, size=(nx,ny)))
     grid1 = cuda.device_array((nx+2, ny+2))
-    for iter in range(iters):
+    for _ in range(iterations):
         toroidalize[blockspergrid, threadsperblock](grid0, grid1)
         update[blockspergrid, threadsperblock](grid0, grid1)
         grid0 = grid1[1:nx+1,1:ny+1]
-        imsave(outfolder + "/{0:04d}.png".format(iter), grid0)
+        frames.append(grid0.copy_to_host())
+    end = timer()
+    print("Simulation done in {:3.3f} seconds.".format(end - start))
+    return frames
+
+def image_seq(grids, outfolder="out_gpu"):
+    print("Generating image sequence...")
+    for i, grid in zip(range(len(grids)), grids):
+        imsave(outfolder + "/{:04d}.png".format(i), grid.transpose())
+    print("Images generated at " + outfolder)
+
+def gif(grids, fps=25, outname="out_gpu"):
+    frames = []
+    print("Generating GIF sequence...")
+    for grid in grids:
+        grid[grid == 1] = 255
+        frames.append(
+            np.stack((
+                    np.zeros(grid.shape),
+                    grid,
+                    np.zeros(grid.shape)),
+                axis=2))
+    write_gif(frames, outname+".gif", fps=fps)
+    print("GIF created: " + outname + ".gif")
 
 if __name__ == "__main__":
-    simulate()
+    gif(simulate())
