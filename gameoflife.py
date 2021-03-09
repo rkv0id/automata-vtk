@@ -22,7 +22,7 @@ def simulate(nx, ny, iters, outfolder):
         imsave(outfolder + "/{0:04d}.png".format(iter), grid0)
 
 if __name__ == "__main__":
-    nx, ny = 420, 256
+    nx, ny = 256, 512
     iters = 500
     outfolder = "out"
     simulate(nx, ny, iters, outfolder)
