@@ -45,7 +45,7 @@ def simulate():
     grid0 = cuda.to_device(np.random.randint(2, size=(nx,ny)))
     grid1 = cuda.device_array((nx+2, ny+2))
     for iter in range(iters):
-        ghostcells[blockspergrid, threadsperblock](grid0, grid1)
+        toroidalize[blockspergrid, threadsperblock](grid0, grid1)
         update[blockspergrid, threadsperblock](grid0, grid1)
         grid0 = grid1[1:nx+1,1:ny+1]
         imsave(outfolder + "/{0:04d}.png".format(iter), grid0)
