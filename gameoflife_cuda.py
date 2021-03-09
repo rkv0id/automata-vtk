@@ -3,7 +3,7 @@ from numba import cuda
 from matplotlib.pyplot import imsave
 
 # globals
-nx, ny = 420, 256
+nx, ny = 256, 512
 iters = 500
 outfolder = "out_gpu"
 
@@ -35,14 +35,12 @@ def update(grida, gridb):
             gridb[x+1,y+1] = 1
 
 def simulate():
-    grid0 = np.random.randint(2, size=(nx,ny))
-    grid1_d = cuda.device_array((nx+2, ny+2))
+    grid0 = cuda.to_device(np.random.randint(2, size=(nx,ny)))
+    grid1 = cuda.device_array((nx+2, ny+2))
     for iter in range(iters):
-        grid0_d = cuda.to_device(grid0)
-        ghostcells[blockspergrid, threadsperblock](grid0_d, grid1_d)
-        update[blockspergrid, threadsperblock](grid0_d, grid1_d)
-        grid1 = grid1_d.copy_to_host()
-        grid0 = grid1[1:nx+1,1:ny+1].copy()
+        ghostcells[blockspergrid, threadsperblock](grid0, grid1)
+        update[blockspergrid, threadsperblock](grid0, grid1)
+        grid0 = grid1[1:nx+1,1:ny+1]
         imsave(outfolder + "/{0:04d}.png".format(iter), grid0)
 
 if __name__ == "__main__":
