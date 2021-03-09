@@ -14,7 +14,10 @@ blockspergrid_y = int(np.ceil(ny / threadsperblock[1]))
 blockspergrid   = (blockspergrid_x, blockspergrid_y)
 
 @cuda.jit
-def ghostcells(grida, gridb):
+def toroidalize(grida, gridb):
+    """Morph the NDarray `grida` into
+    a toroidal NDarray output in `gridb`
+    """
     x, y = cuda.grid(2)
     if (x == 0 or x == nx+1) and (y >= 1 and y <= ny):
         gridb[x,y] = grida[nx-x-1,y-1]
@@ -23,6 +26,8 @@ def ghostcells(grida, gridb):
 
 @cuda.jit
 def update(grida, gridb):
+    """Local cell update kernel
+    """
     x, y = cuda.grid(2)
     if x < nx and y < ny:
         neighbors = 0
@@ -35,6 +40,8 @@ def update(grida, gridb):
             gridb[x+1,y+1] = 1
 
 def simulate():
+    """CA simulation steps generation
+    """
     grid0 = cuda.to_device(np.random.randint(2, size=(nx,ny)))
     grid1 = cuda.device_array((nx+2, ny+2))
     for iter in range(iters):
