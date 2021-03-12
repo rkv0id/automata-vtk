@@ -58,4 +58,4 @@ def simulate(iterations=250):
     return frames
 
 if __name__ == "__main__":
-    gif(simulate())
+    gif(simulate(), 25, outfolder)
