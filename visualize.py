@@ -2,10 +2,11 @@ from numpy import stack, zeros
 from matplotlib.pyplot import imsave
 from array2gif import write_gif
 
-def image_seq(grids, outfolder="out_gpu"):
+def image_seq(grids, outfolder="out_gpu", cmap="jet"):
     print("Generating image sequence...")
     for i, grid in zip(range(len(grids)), grids):
-        imsave(outfolder + "/{:04d}.png".format(i), grid.transpose())
+        imsave(outfolder + "/{:04d}.png".format(i),
+            grid.transpose(), cmap=cmap)
     print("Images generated at " + outfolder)
 
 def gif(grids, fps=25, outname="out_gpu"):
